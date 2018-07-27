@@ -67,9 +67,11 @@ def main():
                     data_temp = queue_temperature.get()
     
             # save data to file
-            today = datetime.datetime.today()
-
-            with open('./logs/{}_{}_{}.log'.format(today.year, today.month, today.day), 'a') as out:
+            now = datetime.datetime.utcnow()
+    
+            with open('./logs/{}_{}_{}.log'.format(now.year, now.month, now.day), 'a') as out:
+                # log time as {hour}:{minute}:{second}:{millis},
+                out.write('{}:{}:{}:{:.0f},'.format(now.hour, now.minute, now.second, now.microsecond/1000))
                 out.write('{:0.0f},'.format(data_temp*1000))
                 out.write('\n')
         
