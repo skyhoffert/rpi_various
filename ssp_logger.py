@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 
+import datetime
 import json
 import pickle
 import queue
 import socket
 import sys
 import threading
+import time
 
 def thr_read_temp(port, rxbuffsize, q, stop_flag):
     # open UDP socket connection
@@ -43,15 +45,35 @@ def main():
     t_read_temp = threading.Thread(target=thr_read_temp, args=(config['ports']['temperature_1'], config['rx_buffer_size'], queue_temperature, lambda: stop_flag))
     t_read_temp.start()
 
+    # set up timers
+    time_last = time.time()
+    time_now = time.time()
+    time_between_samples = config['s_between_samples']
+
     try:
         while True:
+            # wait for next sampling to occur
+            while time_now - time_last < time_between_samples:
+                time_now = time.time()
+
+            # reset variables
+            time_last = time_now
+            data_temp = 0
+
             # if there is something in the temperature queue
             if not queue_temperature.empty():
                 # pop until we get the most recent sample
                 while not queue_temperature.empty():
                     data_temp = queue_temperature.get()
-                # DEBUG
-                print('Temperature: {}'.format(data_temp))
+    
+            # save data to file
+            today = datetime.datetime.today()
+
+            with open('./logs/{}_{}_{}.log'.format(today.year, today.month, today.day), 'a') as out:
+                out.write('{:0.0f},'.format(data_temp*1000))
+                out.write('\n')
+        
+    # catch a keyboard interrupt to kill the script
     except KeyboardInterrupt:
         stop_flag = True
 
