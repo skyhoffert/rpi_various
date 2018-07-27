@@ -1,0 +1,8 @@
+{
+    "ports": {
+        "temperature_1": 8120,
+        "temperature_2": 8211,
+        "humidity_1": 8220
+    },
+    "s_between_samples": 1
+}
