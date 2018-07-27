@@ -4,5 +4,6 @@
         "temperature_2": 8211,
         "humidity_1": 8220
     },
-    "s_between_samples": 1
+    "s_between_samples": 1,
+    "rx_buffer_size": 1024
 }

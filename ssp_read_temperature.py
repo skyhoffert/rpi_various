@@ -14,7 +14,7 @@ import time
 # TODO -- remove this once real sensor reading is implemented
 def faux_read():
     mu = 20.2 # degrees C
-    stddev = 1.0
+    stddev = 0.1
     return random.gauss(mu, stddev)
 
 # read from the connected temperature sensor
@@ -36,24 +36,33 @@ def main():
 
     # attempt to set up UDP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    addr = ('localhost', config['ports']['temperature_1'])
+    sock.settimeout(1.0)
+    addr = ('127.0.0.1', config['ports']['temperature_1'])
 
     # start the timer
     time_last = time.time()
     time_now = time.time()
     time_between_samples = config['s_between_samples']
     
-    while True:
-        # wait for next sampling to occur
-        while time_now - time_last < time_between_samples:
-            time_now = time.time()
+    try:
+        while True:
+            # wait for next sampling to occur
+            while time_now - time_last < time_between_samples:
+                time_now = time.time()
 
-        # read from the sensor
-        temp = read_sensor()
-        temp = pickle.dumps(temp)
+            # reset the timer
+            time_last = time_now
 
-        # send to main program (if running)
-        send_temp(temp, socket=sock, address=addr)
+            # read from the sensor
+            temp = read_sensor()
+            temp = pickle.dumps(temp)
+
+            # send to main program (if running)
+            send_temp(temp, socket=sock, address=addr)
+    except KeyboardInterrupt:
+        pass
+
+    print('\nCaught Interrupt. Exiting...')
 
 if __name__ == '__main__':
     main()
