@@ -45,8 +45,12 @@ def main():
 
     try:
         while True:
+            # if there is something in the temperature queue
             if not queue_temperature.empty():
-                data_temp = queue_temperature.get()
+                # pop until we get the most recent sample
+                while not queue_temperature.empty():
+                    data_temp = queue_temperature.get()
+                # DEBUG
                 print('Temperature: {}'.format(data_temp))
     except KeyboardInterrupt:
         stop_flag = True
